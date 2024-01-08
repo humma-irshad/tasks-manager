@@ -1,28 +1,47 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { GetTasksDTO, TaskStatus, TTaskStatus } from './dto/get-task.dto';
+import { GetTasksDTO, TTaskStatus } from './dto/get-task.dto';
 import { CreateTaskDTO } from './dto/create-task.dto';
 import { GetTasksFilterDTO } from './dto/get-tasks-filter.dto';
 import { Tasks } from './entities/task.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class TaskService {
+  private logger = new Logger('TasksController');
+
   constructor(
     @InjectRepository(Tasks)
     private tasksRepository: Repository<Tasks>,
   ) {}
 
-  async getAllTasks() {
-    return await this.tasksRepository.find();
+  private mapTaskToDTO(task: Tasks): GetTasksDTO {
+    const getTasksDTO = new GetTasksDTO();
+    getTasksDTO.id = task.id;
+    getTasksDTO.title = task.title;
+    getTasksDTO.description = task.description;
+    getTasksDTO.status = task.status;
+
+    return getTasksDTO;
   }
 
-  async getTasksWithFilter(filterDTO: GetTasksFilterDTO) {
+  async getAllTasks(user: User) {
+    return await this.tasksRepository.find({ where: { user } });
+  }
+
+  async getTasksWithFilter(filterDTO: GetTasksFilterDTO, user: User) {
+    this.logger.verbose(
+      `The user "${
+        user.username
+      }" is trying to retrieve all their tasks with filters ${JSON.stringify(
+        filterDTO,
+      )}}`,
+    );
     const { search, status } = filterDTO;
 
-    let tasks = await this.getAllTasks();
+    let tasks = await this.getAllTasks(user);
 
     if (status) {
       tasks = tasks.filter((task) => task.status === status);
@@ -43,8 +62,8 @@ export class TaskService {
     return tasks;
   }
 
-  getTaskById(id: string) {
-    const found = this.tasksRepository.findOneBy({ id });
+  async getTaskById(id: string, user: User) {
+    const found = await this.tasksRepository.findOne({ where: { user, id } });
 
     if (!found) {
       throw new NotFoundException();
@@ -53,27 +72,30 @@ export class TaskService {
     return found;
   }
 
-  createTask({ title, description }: CreateTaskDTO) {
-    const task: GetTasksDTO = {
-      id: uuid(),
-      title,
-      description,
-      status: TaskStatus[0],
-    };
-    this.tasksRepository.save(task);
+  async createTask({ title, description }: CreateTaskDTO, user: User) {
+    this.logger.verbose(
+      `The user "${user.username}" is creating the task: ${JSON.stringify(
+        user.task,
+      )}`,
+    );
 
-    return task;
+    const task = await this.tasksRepository.save({ title, description, user });
+
+    return this.mapTaskToDTO(task);
   }
 
-  async updateTaskStatus(id: string, status: TTaskStatus) {
-    const task = await this.getTaskById(id);
+  async updateTaskStatus(id: string, status: TTaskStatus, user: User) {
+    const task = await this.getTaskById(id, user);
+
+    if (!task) throw new NotFoundException();
+
     task.status = status;
 
     return task;
   }
 
-  async deleteTask(id: string) {
-    const result = await this.tasksRepository.delete({ id });
+  async deleteTask(id: string, user: User) {
+    const result = await this.tasksRepository.delete({ user, id });
 
     if (result.affected == 0) throw new NotFoundException();
   }

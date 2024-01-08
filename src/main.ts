@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { ZodValidationPipe, patchNestJsSwagger } from 'nestjs-zod';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.useGlobalPipes(new ZodValidationPipe());
 
   patchNestJsSwagger();

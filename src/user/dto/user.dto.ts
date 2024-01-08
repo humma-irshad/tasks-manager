@@ -7,6 +7,6 @@ const UserSchema = z.object({
   password: z.string().min(6).max(20),
 });
 export class UserDTO extends createZodDto(UserSchema) {}
-export class signUpDTO extends createZodDto(
+export class CredentialsDTO extends createZodDto(
   UserSchema.pick({ username: true, password: true }),
 ) {}

@@ -1,8 +1,13 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
-import { UserDTO, signUpDTO } from './dto/user.dto';
+import { CredentialsDTO } from './dto/user.dto';
 import { UserService } from './user.service';
+import { AccessTokenDTO } from './dto/access-token.dto';
 
 @Controller('user')
 export class UserController {
@@ -10,8 +15,21 @@ export class UserController {
 
   @Post('/signup')
   @ApiOperation({ operationId: 'signupUser' })
-  @ApiOkResponse({ type: signUpDTO })
-  async signUp(@Body() userDTO: UserDTO) {
-    return this.userService.createUser(userDTO);
+  async signUp(@Body() credentialsDTO: CredentialsDTO) {
+    console.log(credentialsDTO);
+    return this.userService.createUser(credentialsDTO);
+  }
+
+  @Post('/signin')
+  @ApiOperation({ operationId: 'signinUser' })
+  @ApiOkResponse({
+    type: AccessTokenDTO,
+    description: 'User has been logged-in',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Please check your login credentials',
+  })
+  async signIn(@Body() credentialsDTO: CredentialsDTO) {
+    return this.userService.signIn(credentialsDTO);
   }
 }
