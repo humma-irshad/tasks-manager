@@ -25,7 +25,7 @@ export class TaskController {
   constructor(private taskService: TaskService) {}
 
   @Get()
-  @ApiOperation({ operationId: 'getAllTasks' })
+  @ApiOperation({ operationId: 'getAllTasks', tags: ['tasks'] })
   @ApiOkResponse({ type: ListAllTasksDTO })
   getTasks(@Body() filterDTO: GetTasksFilterDTO, @GetUser() user: User) {
     if (Object.keys.length) {
@@ -36,21 +36,21 @@ export class TaskController {
   }
 
   @Get('/:id')
-  @ApiOperation({ operationId: 'getTaskById' })
+  @ApiOperation({ operationId: 'getTaskById', tags: ['tasks'] })
   @ApiOkResponse({ type: GetTasksDTO })
   getTaskById(@Param('id') id: string, @GetUser() user: User) {
     return this.taskService.getTaskById(id, user);
   }
 
   @Post()
-  @ApiOperation({ operationId: 'createTask' })
+  @ApiOperation({ operationId: 'createTask', tags: ['tasks'] })
   @ApiOkResponse({ type: GetTasksDTO })
   createTask(@Body() createTaskDTO: CreateTaskDTO, @GetUser() user: User) {
     return this.taskService.createTask(createTaskDTO, user);
   }
 
   @Patch('/:id/status')
-  @ApiOperation({ operationId: 'updateTaskStatus' })
+  @ApiOperation({ operationId: 'updateTaskStatus', tags: ['tasks'] })
   @ApiOkResponse({ type: GetTasksDTO })
   updateTaskStatus(
     @Param('id') id: string,
@@ -62,7 +62,7 @@ export class TaskController {
   }
 
   @Delete('/:id')
-  @ApiOperation({ operationId: 'deleteTask' })
+  @ApiOperation({ operationId: 'deleteTask', tags: ['tasks'] })
   @ApiOkResponse({ description: 'Task has been deleted' })
   deleteTask(@Param('id') id: string, @GetUser() user: User) {
     return this.taskService.deleteTask(id, user);

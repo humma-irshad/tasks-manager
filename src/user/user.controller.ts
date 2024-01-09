@@ -14,14 +14,14 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('/signup')
-  @ApiOperation({ operationId: 'signupUser' })
+  @ApiOperation({ operationId: 'signupUser', tags: ['user'] })
   async signUp(@Body() credentialsDTO: CredentialsDTO) {
     console.log(credentialsDTO);
     return this.userService.createUser(credentialsDTO);
   }
 
   @Post('/signin')
-  @ApiOperation({ operationId: 'signinUser' })
+  @ApiOperation({ operationId: 'signinUser', tags: ['user'] })
   @ApiOkResponse({
     type: AccessTokenDTO,
     description: 'User has been logged-in',
