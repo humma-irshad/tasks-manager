@@ -28,6 +28,11 @@ export class UserService {
 
     try {
       await this.userRepository.save({ username, password: hashedPassword });
+      const payload: IJwtPayload = { username };
+      const accessToken = await this.jwtService.signAsync(payload, {
+        secret: this.configService.getOrThrow('JWT_SECRET'),
+      });
+      return { accessToken };
     } catch (error) {
       // duplicate username
       if (error.code == '23505') {
@@ -46,7 +51,7 @@ export class UserService {
       const accessToken = await this.jwtService.signAsync(payload, {
         secret: this.configService.getOrThrow('JWT_SECRET'),
       });
-
+      console.log({ username, password });
       return { accessToken };
     } else {
       throw new UnauthorizedException('Please check your login credentials');

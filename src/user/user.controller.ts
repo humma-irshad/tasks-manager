@@ -15,8 +15,11 @@ export class UserController {
 
   @Post('/signup')
   @ApiOperation({ operationId: 'signupUser', tags: ['user'] })
+  @ApiOkResponse({
+    type: AccessTokenDTO,
+    description: 'User has been signed-up',
+  })
   async signUp(@Body() credentialsDTO: CredentialsDTO) {
-    console.log(credentialsDTO);
     return this.userService.createUser(credentialsDTO);
   }
 

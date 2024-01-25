@@ -90,6 +90,7 @@ export class TaskService {
     if (!task) throw new NotFoundException();
 
     task.status = status;
+    this.tasksRepository.save(task);
 
     return task;
   }
