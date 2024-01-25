@@ -1,3 +1,3 @@
 ### `npm run start:dev`
 
-### Create a docker container before starting the backend
+### Create a docker container for Postgres before starting the backend
